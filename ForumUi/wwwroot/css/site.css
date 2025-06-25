@@ -1,0 +1,152 @@
+/* Yanýt hiyerarþisi için özel stiller */
+.reply-container {
+    position: relative;
+}
+
+    .reply-container .card {
+        transition: box-shadow 0.2s ease;
+    }
+
+        .reply-container .card:hover {
+            box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+        }
+
+    /* Alt yanýtlar için kenarlýk */
+    .reply-container .border-start {
+        border-left-width: 3px !important;
+        border-left-color: #0dcaf0 !important;
+    }
+
+    /* Derin yanýtlar için renk deðiþimi */
+    .reply-container[style*="margin-left: 60px"] .border-start {
+        border-left-color: #198754 !important;
+    }
+
+    .reply-container[style*="margin-left: 90px"] .border-start {
+        border-left-color: #fd7e14 !important;
+    }
+
+    .reply-container[style*="margin-left: 120px"] .border-start {
+        border-left-color: #dc3545 !important;
+    }
+
+/* Yanýt butonlarý */
+.btn-sm {
+    font-size: 0.8rem;
+}
+
+/* Geçici alert'ler */
+.temp-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Beðeni butonlarý */
+.btn-outline-primary:hover {
+    transform: scale(1.05);
+    transition: transform 0.1s ease;
+}
+
+.btn-primary {
+    transform: scale(1.02);
+}
+
+/* Responsive tasarým */
+@media (max-width: 768px) {
+    .reply-container {
+        margin-left: 10px !important;
+    }
+
+        .reply-container[style*="margin-left"] {
+            margin-left: 15px !important;
+        }
+
+    .temp-alert {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 1rem;
+    }
+    /* Mevcut CSS kodlarýnýzýn altýna bu kýsmý ekleyin */
+
+    /* Footer'ý sayfanýn altýnda tutmak için */
+    html, body {
+        height: 100%;
+    }
+
+    .footer {
+        background-color: #f8f9fa;
+        flex-shrink: 0;
+    }
+
+    /* Eðer içerik az ise footer alt tarafta kalacak */
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container.flex-grow-1 {
+        flex: 1 0 auto;
+    }
+
+    /* Admin panel linki için özel stil */
+    .nav-link.text-danger:hover {
+        color: #dc3545 !important;
+        background-color: rgba(220, 53, 69, 0.1);
+        border-radius: 4px;
+    }
+
+    /* Debug bilgisi için küçük stil */
+    .navbar-text small {
+        font-size: 0.75rem;
+        background-color: rgba(13, 202, 240, 0.1);
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+
+    /* Alert mesajlarý için daha iyi görünüm */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .alert-success {
+        background-color: #d1edff;
+        color: #0c63e4;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    /* Navbar brand için hover efekti */
+    .navbar-brand:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease-in-out;
+    }
+
+    /* Navigation linkleri için hover efekti */
+    .nav-link:hover {
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 4px;
+        transition: background-color 0.2s ease-in-out;
+    }
+}

@@ -1,0 +1,22 @@
+﻿@model ForumUi.Views.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+<form asp-action="Register" method="post">
+    <div>
+        <label>Kullanıcı Adı</label>
+        <input asp-for="Username" />
+        <span asp-validation-for="Username"></span>
+    </div>
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label>Şifre</label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <button type="submit">Kayıt Ol</button>
+</form>

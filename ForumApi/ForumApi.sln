@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumDenemeApi", "ForumDenemeApi.csproj", "{2DBD13ED-AF59-45AD-9E40-37D89C43EC91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumUi", "..\ForumUi\ForumUi.csproj", "{0EFC7999-0DC7-45E8-8905-A1B8AAD34186}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DBD13ED-AF59-45AD-9E40-37D89C43EC91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBD13ED-AF59-45AD-9E40-37D89C43EC91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBD13ED-AF59-45AD-9E40-37D89C43EC91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBD13ED-AF59-45AD-9E40-37D89C43EC91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EFC7999-0DC7-45E8-8905-A1B8AAD34186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EFC7999-0DC7-45E8-8905-A1B8AAD34186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EFC7999-0DC7-45E8-8905-A1B8AAD34186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EFC7999-0DC7-45E8-8905-A1B8AAD34186}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9C5820B-8566-4D61-8BF7-FF0093C4EF4A}
+	EndGlobalSection
+EndGlobal

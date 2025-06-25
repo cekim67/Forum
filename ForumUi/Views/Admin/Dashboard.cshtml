@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Kontrol Paneli</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Kullanıcılar</h5>
+                <p class="card-text">Tüm kullanıcıları görüntüleyin, yetki verin veya devre dışı bırakın.</p>
+                <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="ManageUsers">
+                    Kullanıcıları Yönet
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Konular ve Yanıtlar</h5>
+                <p class="card-text">Tüm forum içeriğini görüntüleyin ve gerektiğinde silin.</p>
+                <a class="btn btn-outline-danger" asp-controller="Admin" asp-action="ModerateContent">
+                    İçerik Yönetimi
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

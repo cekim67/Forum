@@ -1,0 +1,65 @@
+﻿@model ForumUi.Models.ReplyDto
+
+<div class="reply-container mb-3" style="margin-left: @(ViewBag.Level != null ? (int)ViewBag.Level * 30 : 0)px;">
+    <div class="card @(ViewBag.Level != null && (int)ViewBag.Level > 0 ? "border-start border-3 border-info" : "")">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <p class="card-text">@Html.Raw(Model.Content)</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> @Model.Username • 
+                            <i class="bi bi-calendar"></i> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                        </small>
+                        
+                        @if (ViewBag.IsLoggedIn)
+                        {
+                            <button type="button" 
+                                    class="btn btn-link btn-sm text-decoration-none p-0" 
+                                    onclick="replyToReply(@Model.Id, '@Model.Username')">
+                                <i class="bi bi-reply"></i> Yanıtla
+                            </button>
+                        }
+                    </div>
+                </div>
+                <div class="ms-3 d-flex flex-column align-items-center">
+                    @if (ViewBag.IsLoggedIn)
+                    {
+                        <button type="button" 
+                                class="btn @(Model.Liked ? "btn-primary" : "btn-outline-primary") btn-sm mb-1" 
+                                id="reply-like-btn-@Model.Id"
+                                onclick="likeReply(@Model.Id, @ViewBag.TopicId)">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-secondary btn-sm mb-1" disabled>
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    }
+                    <small class="text-muted">
+                        <span id="reply-like-count-@Model.Id">@Model.LikeCount</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alt Yanıtlar -->
+    @if (Model.ChildReplies?.Any() == true)
+    {
+        @foreach (var childReply in Model.ChildReplies)
+        {
+            
+            {
+                ViewBag.Level = (ViewBag.Level ?? 0) + 1;
+            }
+            @await Html.PartialAsync("_ReplyPartial", childReply)
+            
+            {
+                ViewBag.Level = (ViewBag.Level ?? 1) - 1;
+            }
+        }
+    }
+</div>
