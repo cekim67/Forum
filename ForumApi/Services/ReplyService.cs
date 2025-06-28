@@ -31,9 +31,9 @@ namespace ForumApi.Services
         public async Task<List<ReplyResponseDto>> GetRepliesByTopicAsync(int topicId)
         {
             var replies = await _context.Replies
-                .Where(r => r.TopicId == topicId && r.ParentReplyId == null && !r.IsDeleted)
+                .Where(r => r.TopicId == topicId && r.ParentReplyId == null)
                 .Include(r => r.User)
-                .Include(r => r.ChildReplies.Where(c => !c.IsDeleted))
+                .Include(r => r.ChildReplies)
                     .ThenInclude(c => c.User)
                 .ToListAsync();
 
@@ -43,13 +43,13 @@ namespace ForumApi.Services
         public async Task<bool> DeleteAsync(int replyId, int userId, bool isAdmin)
         {
             var reply = await _context.Replies.FindAsync(replyId);
-            if (reply == null || reply.IsDeleted)
+            if (reply == null )
                 return false;
 
             if (reply.UserId != userId && !isAdmin)
                 return false;
 
-            reply.IsDeleted = true;
+           
             await _context.SaveChangesAsync();
             return true;
         }

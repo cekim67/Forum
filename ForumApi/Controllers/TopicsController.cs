@@ -79,26 +79,6 @@ namespace ForumApi.Controllers
             return Ok(created);
         }
 
-        /// <summary>
-        /// Bir konuyu siler (sadece konu sahibi veya admin)
-        /// </summary>
-        /// <param name="id">Silinecek konunun ID'si</param>
-        /// <returns>Silme işleminin sonucu</returns>
-        /// <response code="204">Konu başarıyla silindi</response>
-        /// <response code="401">Kullanıcı giriş yapmamış</response>
-        /// <response code="403">Bu konuyu silme yetkiniz yok</response>
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var isAdmin = User.IsInRole("Admin");
-            var success = await _topicService.DeleteAsync(id, userId, isAdmin);
-            if (!success) return Forbid();
-            return NoContent();
-        }
+        
     }
 }

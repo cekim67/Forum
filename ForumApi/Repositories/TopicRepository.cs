@@ -17,7 +17,6 @@ namespace ForumApi.Repositories
         public async Task<List<Topic>> GetAllAsync()
         {
             return await _context.Topics.Include(t => t.User)
-                .Where(t => !t.IsDeleted)
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
         }
@@ -25,7 +24,7 @@ namespace ForumApi.Repositories
         public async Task<Topic?> GetByIdAsync(int id)
         {
             return await _context.Topics.Include(t => t.User)
-                .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
+                .FirstOrDefaultAsync(t => t.Id == id );
         }
 
         public async Task AddAsync(Topic topic)
@@ -33,18 +32,13 @@ namespace ForumApi.Repositories
             await _context.Topics.AddAsync(topic);
         }
 
-        public Task DeleteAsync(Topic topic)
-        {
-            topic.IsDeleted = true;
-            _context.Topics.Update(topic);
-            return Task.CompletedTask;
-        }
+        
         public async Task<Topic?> GetByIdWithUserAndLikesAsync(int id)
         {
             return await _context.Topics
                 .Include(t => t.User)
-                .Include(t => t.Likes)
-                .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
+                
+                .FirstOrDefaultAsync(t => t.Id == id );
         }
 
         

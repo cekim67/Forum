@@ -41,54 +41,9 @@ namespace ForumApi.Controllers
             return Ok(users);
         }
 
-        /// <summary>
-        /// Belirtilen kullanıcıyı admin yapar
-        /// </summary>
-        /// <param name="id">Admin yapılacak kullanıcının ID'si</param>
-        /// <returns>Güncellenmiş kullanıcı bilgileri</returns>
-        /// <response code="200">Kullanıcı başarıyla admin yapıldı</response>
-        /// <response code="404">Kullanıcı bulunamadı</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("users/{id}/make-admin")]
-        public async Task<IActionResult> MakeUserAdmin(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound();
+       
 
-            user.IsAdmin = true;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { user.Id, user.Username, IsAdmin = user.IsAdmin });
-        }
-
-        /// <summary>
-        /// Kullanıcının aktif/pasif durumunu değiştirir
-        /// </summary>
-        /// <param name="id">Durumu değiştirilecek kullanıcının ID'si</param>
-        /// <returns>Güncellenmiş kullanıcı durumu</returns>
-        /// <response code="200">Kullanıcı durumu başarıyla değiştirildi</response>
-        /// <response code="400">Admin kullanıcılar pasif hale getirilemez</response>
-        /// <response code="404">Kullanıcı bulunamadı</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("users/{id}/toggle-active")]
-        public async Task<IActionResult> ToggleUserActive(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound();
-
-            if (user.IsAdmin)
-                return BadRequest("Admin kullanıcılar pasif hale getirilemez!");
-
-            user.IsActive = !user.IsActive;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { user.Id, user.IsActive });
-        }
+        
 
         /// <summary>
         /// Forumdaki tüm konuları getirir
@@ -106,7 +61,7 @@ namespace ForumApi.Controllers
                     t.Id,
                     t.Title,
                     t.Content,
-                    t.IsDeleted,
+
                     Username = t.User.Username,
                     t.CreatedAt
                 })
@@ -132,7 +87,6 @@ namespace ForumApi.Controllers
                     r.Id,
                     r.Content,
                     r.TopicId,
-                    r.IsDeleted,
                     Username = r.User.Username,
                     r.CreatedAt
                 })
@@ -160,30 +114,20 @@ namespace ForumApi.Controllers
         public async Task<IActionResult> GetStats()
         {
             var totalUsers = await _context.Users.CountAsync();
-            var activeUsers = await _context.Users.CountAsync(u => u.IsActive);
-            var adminCount = await _context.Users.CountAsync(u => u.IsAdmin);
+        
+
             var totalTopics = await _context.Topics.CountAsync();
             var totalReplies = await _context.Replies.CountAsync();
 
-            var mostLikedTopic = await _context.Topics
-                .Include(t => t.Likes)
-                .OrderByDescending(t => t.Likes.Count)
-                .Select(t => new
-                {
-                    t.Id,
-                    t.Title,
-                    LikeCount = t.Likes.Count
-                })
-                .FirstOrDefaultAsync();
+            
 
             return Ok(new
             {
                 TotalUsers = totalUsers,
-                ActiveUsers = activeUsers,
-                AdminCount = adminCount,
+               
                 TotalTopics = totalTopics,
                 TotalReplies = totalReplies,
-                MostLikedTopic = mostLikedTopic
+               
             });
         }
 

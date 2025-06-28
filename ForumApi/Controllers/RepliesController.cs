@@ -58,26 +58,6 @@ namespace ForumApi.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Bir yanıtı siler (sadece yanıt sahibi veya admin)
-        /// </summary>
-        /// <param name="id">Silinecek yanıtın ID'si</param>
-        /// <returns>Silme işleminin sonucu</returns>
-        /// <response code="204">Yanıt başarıyla silindi</response>
-        /// <response code="401">Kullanıcı giriş yapmamış</response>
-        /// <response code="403">Bu yanıtı silme yetkiniz yok</response>
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var isAdmin = User.IsInRole("Admin");
-            var success = await _replyService.DeleteAsync(id, userId, isAdmin);
-            if (!success) return Forbid();
-            return NoContent();
-        }
+     
     }
 }

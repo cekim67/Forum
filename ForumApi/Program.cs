@@ -62,7 +62,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 builder.Services.AddScoped<IReplyService, ReplyService>();
-builder.Services.AddScoped<ILikeService, LikeService>();
+
 
 builder.Services.AddScoped<IUserService, UserService>();
 

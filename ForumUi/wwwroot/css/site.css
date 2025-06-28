@@ -1,152 +1,353 @@
-/* Yanýt hiyerarþisi için özel stiller */
-.reply-container {
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
     position: relative;
+    min-height: 100%;
 }
 
-    .reply-container .card {
-        transition: box-shadow 0.2s ease;
+body {
+    margin-bottom: 60px;
+}
+
+/* ===== REPLY SYSTEM STYLES ===== */
+
+/* Ana yanýt kartlarý */
+.reply-card {
+    transition: all 0.3s ease;
+    position: relative;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+    .reply-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
     }
 
-        .reply-container .card:hover {
-            box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
-        }
+/* Reply içeriði */
+.reply-content {
+    padding: 1rem;
+}
 
-    /* Alt yanýtlar için kenarlýk */
-    .reply-container .border-start {
-        border-left-width: 3px !important;
-        border-left-color: #0dcaf0 !important;
-    }
+.reply-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
 
-    /* Derin yanýtlar için renk deðiþimi */
-    .reply-container[style*="margin-left: 60px"] .border-start {
-        border-left-color: #198754 !important;
-    }
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
 
-    .reply-container[style*="margin-left: 90px"] .border-start {
-        border-left-color: #fd7e14 !important;
-    }
+.reply-meta {
+    flex: 1;
+}
 
-    .reply-container[style*="margin-left: 120px"] .border-start {
-        border-left-color: #dc3545 !important;
-    }
+.reply-username {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+    font-size: 0.9rem;
+}
 
-/* Yanýt butonlarý */
-.btn-sm {
+.reply-date {
+    color: #6c757d;
     font-size: 0.8rem;
+    margin: 0;
 }
 
-/* Geçici alert'ler */
-.temp-alert {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    min-width: 300px;
-    animation: slideIn 0.3s ease-out;
+.reply-text {
+    color: #212529;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
 }
 
-@keyframes slideIn {
+.reply-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Alt yanýt konteyneri */
+.reply-thread {
+    position: relative;
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+    /* Ana baðlantý çizgisi */
+    .reply-thread::before {
+        content: '';
+        position: absolute;
+        left: -1rem;
+        top: 0;
+        bottom: 1rem;
+        width: 2px;
+        background: linear-gradient(to bottom, #007bff 0%, #6c757d 100%);
+        opacity: 0.4;
+    }
+
+/* Alt yanýt kartlarý */
+.child-reply {
+    position: relative;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid #007bff;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    box-shadow: 0 1px 4px rgba(0,123,255,0.1);
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+    /* Yatay baðlantý çizgisi */
+    .child-reply::before {
+        content: '';
+        position: absolute;
+        left: -1.25rem;
+        top: 1.5rem;
+        width: 1rem;
+        height: 2px;
+        background: linear-gradient(to right, #6c757d, #007bff);
+        opacity: 0.4;
+    }
+
+    /* Baðlantý noktasý */
+    .child-reply::after {
+        content: '';
+        position: absolute;
+        left: -0.375rem;
+        top: 1.25rem;
+        width: 6px;
+        height: 6px;
+        background: #007bff;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px #007bff;
+    }
+
+    .child-reply:hover {
+        transform: translateX(2px);
+        box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+    }
+
+/* Seviye bazlý stillemeler */
+.reply-level-1 {
+    border-left-color: #007bff;
+}
+
+    .reply-level-1::after {
+        background: #007bff;
+        box-shadow: 0 0 0 1px #007bff;
+    }
+
+    .reply-level-1 .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+.reply-level-2 {
+    border-left-color: #28a745;
+    margin-left: 1.5rem;
+}
+
+    .reply-level-2::after {
+        background: #28a745;
+        box-shadow: 0 0 0 1px #28a745;
+    }
+
+    .reply-level-2 .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+.reply-level-3 {
+    border-left-color: #ffc107;
+    margin-left: 1rem;
+}
+
+    .reply-level-3::after {
+        background: #ffc107;
+        box-shadow: 0 0 0 1px #ffc107;
+    }
+
+    .reply-level-3 .user-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+/* 4+ seviye için kompakt görünüm */
+.reply-level-4,
+.reply-level-5,
+.reply-level-6 {
+    border-left-color: #6f42c1;
+    margin-left: 0.5rem;
+    font-size: 0.9em;
+    padding: 0.5rem;
+}
+
+    .reply-level-4::after,
+    .reply-level-5::after,
+    .reply-level-6::after {
+        background: #6f42c1;
+        box-shadow: 0 0 0 1px #6f42c1;
+        width: 4px;
+        height: 4px;
+    }
+
+    .reply-level-4 .user-avatar,
+    .reply-level-5 .user-avatar,
+    .reply-level-6 .user-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 9px;
+    }
+
+/* Thread marginleri seviye bazlý düzenleme */
+.reply-level-1 .reply-thread {
+    margin-left: 1.5rem;
+}
+
+.reply-level-2 .reply-thread {
+    margin-left: 1rem;
+}
+
+.reply-level-3 .reply-thread,
+.reply-level-4 .reply-thread,
+.reply-level-5 .reply-thread {
+    margin-left: 0.5rem;
+}
+
+/* Göster/Gizle animasyonlarý */
+.reply-collapse {
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .reply-collapse.show {
+        animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reply-collapse.hide {
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+@keyframes slideDown {
     from {
-        transform: translateX(100%);
         opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
     }
 
     to {
-        transform: translateX(0);
         opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
     }
 }
 
-/* Beðeni butonlarý */
-.btn-outline-primary:hover {
-    transform: scale(1.05);
-    transition: transform 0.1s ease;
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
 }
 
-.btn-primary {
-    transform: scale(1.02);
+/* Toggle butonlarý */
+.toggle-replies-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
+
+    .toggle-replies-btn:hover {
+        transform: translateY(-1px);
+    }
 
 /* Responsive tasarým */
 @media (max-width: 768px) {
-    .reply-container {
-        margin-left: 10px !important;
+    .reply-thread {
+        margin-left: 1rem;
     }
 
-        .reply-container[style*="margin-left"] {
-            margin-left: 15px !important;
+        .reply-thread::before {
+            left: -0.5rem;
         }
 
-    .temp-alert {
-        position: relative;
-        top: 0;
-        right: 0;
-        margin-bottom: 1rem;
-    }
-    /* Mevcut CSS kodlarýnýzýn altýna bu kýsmý ekleyin */
-
-    /* Footer'ý sayfanýn altýnda tutmak için */
-    html, body {
-        height: 100%;
+    .child-reply::before {
+        left: -0.75rem;
+        width: 0.5rem;
     }
 
-    .footer {
-        background-color: #f8f9fa;
-        flex-shrink: 0;
+    .child-reply::after {
+        left: -0.25rem;
+        width: 4px;
+        height: 4px;
     }
 
-    /* Eðer içerik az ise footer alt tarafta kalacak */
-    body {
-        display: flex;
+    /* Mobilde tüm seviyeleri daha kompakt yap */
+    .reply-level-1,
+    .reply-level-2,
+    .reply-level-3 {
+        margin-left: 0.25rem;
+        font-size: 0.9em;
+    }
+
+        .reply-level-1 .reply-thread,
+        .reply-level-2 .reply-thread,
+        .reply-level-3 .reply-thread {
+            margin-left: 0.5rem;
+        }
+
+    .user-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 11px !important;
+    }
+
+    .reply-actions {
         flex-direction: column;
+        gap: 0.25rem;
     }
 
-    .container.flex-grow-1 {
-        flex: 1 0 auto;
-    }
-
-    /* Admin panel linki için özel stil */
-    .nav-link.text-danger:hover {
-        color: #dc3545 !important;
-        background-color: rgba(220, 53, 69, 0.1);
-        border-radius: 4px;
-    }
-
-    /* Debug bilgisi için küçük stil */
-    .navbar-text small {
-        font-size: 0.75rem;
-        background-color: rgba(13, 202, 240, 0.1);
-        padding: 2px 6px;
-        border-radius: 3px;
-    }
-
-    /* Alert mesajlarý için daha iyi görünüm */
-    .alert {
-        border-radius: 8px;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .alert-success {
-        background-color: #d1edff;
-        color: #0c63e4;
-    }
-
-    .alert-warning {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-
-    /* Navbar brand için hover efekti */
-    .navbar-brand:hover {
-        transform: scale(1.05);
-        transition: transform 0.2s ease-in-out;
-    }
-
-    /* Navigation linkleri için hover efekti */
-    .nav-link:hover {
-        background-color: rgba(0,0,0,0.05);
-        border-radius: 4px;
-        transition: background-color 0.2s ease-in-out;
-    }
+        .reply-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
 }

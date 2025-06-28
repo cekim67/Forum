@@ -1,0 +1,39 @@
+﻿@model List<ForumUi.Models.TopicDto>
+@{
+    ViewData["Title"] = "Tüm Konular";
+}
+
+<h2>📝 Tüm Konular</h2>
+<hr />
+
+@if (Model.Any())
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Başlık</th>
+                <th>Yazar</th>
+                <th>Görüntüleme</th>
+                <th>Tarih</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var topic in Model)
+            {
+                <tr>
+                    <td>@topic.Id</td>
+                    <td>@topic.Title</td>
+                    <td>@topic.Username</td>
+                    
+                    <td>@topic.ViewCount</td>
+                    <td>@topic.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">Hiç konu yok.</div>
+}

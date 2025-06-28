@@ -1,22 +1,36 @@
-﻿@model ForumUi.Views.Account.RegisterViewModel
+﻿@model ForumUi.Models.RegisterViewModel
 @{
     ViewData["Title"] = "Kayıt Ol";
 }
+
+<h2><i class="bi bi-person-plus"></i> Kayıt Ol</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
 <form asp-action="Register" method="post">
-    <div>
-        <label>Kullanıcı Adı</label>
-        <input asp-for="Username" />
-        <span asp-validation-for="Username"></span>
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
     </div>
-    <div>
-        <label>Email</label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div>
-        <label>Şifre</label>
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password"></span>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <button type="submit">Kayıt Ol</button>
+    <button type="submit" class="btn btn-success">Kayıt Ol</button>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

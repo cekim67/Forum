@@ -1,78 +1,51 @@
 ﻿@model List<ForumUi.Models.TopicDto>
 @{
-    ViewData["Title"] = "Forum - Ana Sayfa";
+    ViewData["Title"] = "Forum Ana Sayfa";
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("JWToken"));
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-chat-dots"></i> Forum Konuları</h2>
-    @if (ViewBag.IsLoggedIn)
+    @if (isLoggedIn)
     {
         <a asp-controller="Topics" asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Yeni Konu
+            <i class="bi bi-plus-circle"></i> Yeni Konu Oluştur
         </a>
     }
 </div>
 
-@if (ViewBag.Success != null)
+@if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle"></i> @ViewBag.Success
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="alert alert-success">@TempData["Success"]</div>
 }
-
-@if (ViewBag.Error != null)
+@if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle"></i> @ViewBag.Error
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
 @if (Model.Any())
 {
     @foreach (var topic in Model)
     {
-        <div class="card mb-3 shadow-sm">
+        <div class="card mb-3">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <h5 class="card-title">
-                            <a asp-controller="Topics" asp-action="Details" asp-route-id="@topic.Id"
-                               class="text-decoration-none">
-                                @topic.Title
-                            </a>
-                        </h5>
-                        <p class="card-text">@Html.Raw(topic.Content.Length > 200 ? topic.Content.Substring(0, 200) + "..." : topic.Content)</p>
-                        <small class="text-muted">
-                            <i class="bi bi-person"></i> @topic.Username •
-                            <i class="bi bi-calendar"></i> @topic.CreatedAt.ToString("dd.MM.yyyy HH:mm") •
-                            <i class="bi bi-heart"></i> @topic.LikeCount beğeni
-                        </small>
-                    </div>
-                    <div class="ms-3">
-                        <a asp-controller="Topics" asp-action="Details" asp-route-id="@topic.Id"
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-eye"></i> Görüntüle
-                        </a>
-                    </div>
-                </div>
+                <h5 class="card-title">
+                    <a asp-controller="Topics" asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
+                </h5>
+                <p class="card-text">@Html.Raw(topic.Content.Length > 150 ? topic.Content.Substring(0, 150) + "..." : topic.Content)</p>
+                <small class="text-muted">
+                    <i class="bi bi-person"></i> @topic.Username •
+                    <i class="bi bi-calendar"></i> @topic.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                </small>
+               
+
             </div>
+            
+
         </div>
     }
 }
 else
 {
-    <div class="alert alert-info" role="alert">
-        <i class="bi bi-info-circle"></i> Henüz hiç konu yok.
-        @if (ViewBag.IsLoggedIn)
-        {
-            <a asp-controller="Topics" asp-action="Create">İlk konuyu siz oluşturun!</a>
-        }
-        else
-        {
-            <a href="/Auth/Login">Giriş yapın ve ilk konuyu siz oluşturun!</a>
-            
-        }
-    </div>
+    <div class="alert alert-info">Henüz konu yok. İlk konuyu siz oluşturun!</div>
 }

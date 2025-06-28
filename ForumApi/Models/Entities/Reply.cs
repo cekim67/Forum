@@ -23,11 +23,9 @@ namespace ForumApi.Models.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime? UpdatedAt { get; set; }
 
-        public bool IsDeleted { get; set; } = false;
 
-        public int LikeCount { get; set; } = 0;
+       
 
         // Navigation Properties
         [ForeignKey("UserId")]
@@ -41,6 +39,6 @@ namespace ForumApi.Models.Entities
 
         // .NET 8.0 Collection Expression
         public virtual ICollection<Reply> ChildReplies { get; set; } = [];
-        public virtual ICollection<Like> Likes { get; set; } = [];
+        
     }
 }

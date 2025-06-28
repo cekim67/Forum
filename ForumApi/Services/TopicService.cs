@@ -54,7 +54,7 @@ namespace ForumApi.Services
 
             if (topic.UserId != requestingUserId && !isAdmin) return false;
 
-            await _repository.DeleteAsync(topic);
+            
             await _repository.SaveChangesAsync();
             return true;
         }

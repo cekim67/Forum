@@ -1,8 +1,9 @@
 ﻿using ForumUi.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace ForumUi.Controllers
 {
@@ -17,44 +18,29 @@ namespace ForumUi.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://localhost:7172"); // API URL
             var token = HttpContext.Session.GetString("JWToken");
             var isLoggedIn = !string.IsNullOrEmpty(token);
 
-            var client = _clientFactory.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:7172");
-
-            // Eğer giriş yapılmışsa token ekle
             if (isLoggedIn)
-            {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
 
             var response = await client.GetAsync("/api/Topics");
-
             if (!response.IsSuccessStatusCode)
-            {
-                ViewBag.Error = "Konular alınamadı.";
-                ViewBag.IsLoggedIn = isLoggedIn;
                 return View(new List<TopicDto>());
-            }
 
-            var content = await response.Content.ReadAsStringAsync();
-            var topics = JsonConvert.DeserializeObject<List<TopicDto>>(content);
+            var json = await response.Content.ReadAsStringAsync();
+            var topics = JsonConvert.DeserializeObject<List<TopicDto>>(json);
+            
 
-            // Çift görünme sorununu çözmek için
-            var uniqueTopics = topics?.GroupBy(t => t.Id).Select(g => g.First()).ToList() ?? new List<TopicDto>();
+           
 
             ViewBag.IsLoggedIn = isLoggedIn;
 
-            // Başarı/hata mesajları için
-            if (TempData["Success"] != null)
-                ViewBag.Success = TempData["Success"].ToString();
-            if (TempData["Error"] != null)
-                ViewBag.Error = TempData["Error"].ToString();
-
-            return View(uniqueTopics);
+            return View(topics ?? new List<TopicDto>());
         }
-
+        // GET: Konu oluşturma formunu gösterir
         [HttpGet]
         public IActionResult Create()
         {
@@ -68,8 +54,10 @@ namespace ForumUi.Controllers
             return View();
         }
 
+        // POST: API'ye yeni konu gönderir
         [HttpPost]
-        public async Task<IActionResult> Create(CreateTopicViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateTopicDto dto)
         {
             var token = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(token))
@@ -78,27 +66,24 @@ namespace ForumUi.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            if (!ModelState.IsValid) return View(model);
-
             var client = _clientFactory.CreateClient();
             client.BaseAddress = new Uri("https://localhost:7172");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var json = JsonConvert.SerializeObject(model);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var json = JsonConvert.SerializeObject(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync("/api/Topics", content);
-
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                ViewBag.Error = "Konu oluşturulamadı!";
-                return View(model);
+                TempData["Success"] = "Konu başarıyla oluşturuldu!";
+                return RedirectToAction("Index");
             }
 
-            TempData["Success"] = "Konu başarıyla oluşturuldu!";
-            return RedirectToAction("Index");
+            TempData["Error"] = "Konu oluşturulamadı!";
+            return View(dto);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var token = HttpContext.Session.GetString("JWToken");
@@ -107,7 +92,6 @@ namespace ForumUi.Controllers
             var client = _clientFactory.CreateClient();
             client.BaseAddress = new Uri("https://localhost:7172");
 
-            // Eğer giriş yapılmışsa token ekle
             if (isLoggedIn)
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -120,71 +104,42 @@ namespace ForumUi.Controllers
             var topicJson = await topicResponse.Content.ReadAsStringAsync();
             var topic = JsonConvert.DeserializeObject<TopicDto>(topicJson);
 
-            // Yanıtlar - Cache'i bypass etmek için timestamp ekle
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var replyResponse = await client.GetAsync($"/api/Replies/topic/{id}?_t={timestamp}");
+            // Yanıtlar (hiyerarşik yapı için)
+            var replyResponse = await client.GetAsync($"/api/Replies/topic/{id}");
             var replies = new List<ReplyDto>();
 
             if (replyResponse.IsSuccessStatusCode)
             {
                 var replyJson = await replyResponse.Content.ReadAsStringAsync();
-                var allReplies = JsonConvert.DeserializeObject<List<ReplyDto>>(replyJson) ?? new List<ReplyDto>();
+                var allReplies = JsonConvert.DeserializeObject<List<ReplyDto>>(replyJson) ?? new();
 
-                // Yanıtları hiyerarşik olarak düzenle
-                replies = OrganizeRepliesHierarchically(allReplies);
+                // Yanıtları hiyerarşik yapıya dönüştür
+                replies = BuildReplyHierarchy(allReplies);
             }
+           
+            
 
             ViewBag.Replies = replies;
             ViewBag.Topic = topic;
             ViewBag.TopicId = id;
             ViewBag.IsLoggedIn = isLoggedIn;
 
-            // Başarı/hata mesajları için
-            if (TempData["Success"] != null)
-                ViewBag.Success = TempData["Success"].ToString();
-            if (TempData["Error"] != null)
-                ViewBag.Error = TempData["Error"].ToString();
-
             return View(new CreateReplyViewModel { TopicId = id });
         }
-
-        private List<ReplyDto> OrganizeRepliesHierarchically(List<ReplyDto> allReplies)
-        {
-            var parentReplies = allReplies.Where(r => r.ParentReplyId == null).OrderBy(r => r.CreatedAt).ToList();
-
-            foreach (var parent in parentReplies)
-            {
-                parent.ChildReplies = GetChildReplies(allReplies, parent.Id);
-            }
-
-            return parentReplies;
-        }
-
-        private List<ReplyDto> GetChildReplies(List<ReplyDto> allReplies, int parentId)
-        {
-            var childReplies = allReplies.Where(r => r.ParentReplyId == parentId).OrderBy(r => r.CreatedAt).ToList();
-
-            foreach (var child in childReplies)
-            {
-                child.ChildReplies = GetChildReplies(allReplies, child.Id);
-            }
-
-            return childReplies;
-        }
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddReply(CreateReplyViewModel model)
         {
             var token = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(token))
             {
-                TempData["LoginMessage"] = "Yanıt yazmak için giriş yapmalısınız.";
+                TempData["LoginMessage"] = "Yanıt vermek için giriş yapmalısınız.";
                 return RedirectToAction("Login", "Auth");
             }
 
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Yanıt içeriği boş olamaz!";
+                TempData["Error"] = "Geçersiz veri gönderildi.";
                 return RedirectToAction("Details", new { id = model.TopicId });
             }
 
@@ -193,29 +148,32 @@ namespace ForumUi.Controllers
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var json = JsonConvert.SerializeObject(model);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync("/api/Replies", content);
 
             if (response.IsSuccessStatusCode)
             {
-                TempData["Success"] = "Yanıt başarıyla eklendi!";
+                TempData["Success"] = model.ParentReplyId.HasValue ?
+                    "Yanıtınız başarıyla eklendi!" :
+                    "Yorumunuz başarıyla eklendi!";
             }
             else
             {
-                TempData["Error"] = "Yanıt eklenirken hata oluştu!";
+                var errorContent = await response.Content.ReadAsStringAsync();
+                TempData["Error"] = "Yanıt eklenirken hata oluştu: " + errorContent;
             }
 
             return RedirectToAction("Details", new { id = model.TopicId });
         }
-
         [HttpPost]
         public async Task<IActionResult> LikeReply(int replyId, int topicId)
         {
             var token = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(token))
             {
-                return Json(new { success = false, message = "Beğenmek için giriş yapmalısınız." });
+                TempData["LoginMessage"] = "Beğenmek için giriş yapmalısınız.";
+                return RedirectToAction("Login", "Auth");
             }
 
             var client = _clientFactory.CreateClient();
@@ -226,54 +184,61 @@ namespace ForumUi.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                // Güncellenmiş beğeni sayısını al
-                var likeResponse = await client.GetAsync($"/api/Replies/{replyId}");
-                if (likeResponse.IsSuccessStatusCode)
-                {
-                    var likeJson = await likeResponse.Content.ReadAsStringAsync();
-                    var reply = JsonConvert.DeserializeObject<ReplyDto>(likeJson);
-                    return Json(new { success = true, likeCount = reply?.LikeCount ?? 0, liked = reply?.Liked ?? false });
-                }
-                return Json(new { success = true, likeCount = 0, liked = false });
+                TempData["Success"] = "Beğeni eklendi!";
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                return Json(new { success = false, message = "Beğeni işlemi başarısız oldu." });
+                TempData["Error"] = "Beğeni eklenirken hata oluştu!";
             }
+
+            return RedirectToAction("Details", new { id = topicId });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> LikeTopic(int topicId)
+        // TopicsController.cs - Düzeltilmiş BuildReplyHierarchy metodu
+        private List<ReplyDto> BuildReplyHierarchy(List<ReplyDto> allReplies)
         {
-            var token = HttpContext.Session.GetString("JWToken");
-            if (string.IsNullOrEmpty(token))
+            // Önce tüm yanıtları ID'ye göre dictionary'e koy
+            var replyDict = allReplies.ToDictionary(r => r.Id, r => r);
+            var rootReplies = new List<ReplyDto>();
+
+            // Her yanıt için parent-child ilişkisini kur
+            foreach (var reply in allReplies)
             {
-                return Json(new { success = false, message = "Beğenmek için giriş yapmalısınız." });
-            }
-
-            var client = _clientFactory.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:7172");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await client.PostAsync($"/api/Likes/topic/{topicId}", null);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Güncellenmiş beğeni sayısını al
-                var likeResponse = await client.GetAsync($"/api/Topics/{topicId}");
-                if (likeResponse.IsSuccessStatusCode)
+                if (reply.ParentReplyId == null)
                 {
-                    var likeJson = await likeResponse.Content.ReadAsStringAsync();
-                    var topic = JsonConvert.DeserializeObject<TopicDto>(likeJson);
-                    return Json(new { success = true, likeCount = topic?.LikeCount ?? 0, liked = topic?.Liked ?? false });
+                    // Ana yanıt (parent'ı yok)
+                    rootReplies.Add(reply);
                 }
-                return Json(new { success = true, likeCount = 0, liked = false });
+                else if (replyDict.ContainsKey(reply.ParentReplyId.Value))
+                {
+                    // Alt yanıt - parent'ının ChildReplies listesine ekle
+                    var parentReply = replyDict[reply.ParentReplyId.Value];
+                    if (parentReply.ChildReplies == null)
+                        parentReply.ChildReplies = new List<ReplyDto>();
+
+                    parentReply.ChildReplies.Add(reply);
+                }
             }
-            else
+
+            // Her seviyedeki yanıtları tarih sırasına göre sırala (recursive)
+            SortRepliesRecursively(rootReplies);
+
+            return rootReplies.OrderBy(r => r.CreatedAt).ToList();
+        }
+
+        // Recursive olarak tüm seviyelerdeki yanıtları sırala
+        private void SortRepliesRecursively(List<ReplyDto> replies)
+        {
+            foreach (var reply in replies)
             {
-                return Json(new { success = false, message = "Beğeni işlemi başarısız oldu." });
+                if (reply.ChildReplies != null && reply.ChildReplies.Any())
+                {
+                    reply.ChildReplies = reply.ChildReplies.OrderBy(r => r.CreatedAt).ToList();
+                    SortRepliesRecursively(reply.ChildReplies);
+                }
             }
         }
+        
+
     }
 }

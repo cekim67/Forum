@@ -5,10 +5,22 @@
 namespace ForumApi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLikeCountToTopicAndReply : Migration
+    public partial class mig1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "LikeCount",
+                table: "Topics");
+
+            migrationBuilder.DropColumn(
+                name: "LikeCount",
+                table: "Replies");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
                 name: "LikeCount",
@@ -23,18 +35,6 @@ namespace ForumApi.Migrations
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "LikeCount",
-                table: "Topics");
-
-            migrationBuilder.DropColumn(
-                name: "LikeCount",
-                table: "Replies");
         }
     }
 }

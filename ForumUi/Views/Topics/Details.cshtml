@@ -1,298 +1,129 @@
 ﻿@model ForumUi.Models.CreateReplyViewModel
 @{
-    ViewData["Title"] = "Konu Detayı";
-    var topic = ViewBag.Topic as ForumUi.Models.TopicDto;
-    var replies = ViewBag.Replies as List<ForumUi.Models.ReplyDto>;
+    ViewData["Title"] = "Konu Detayları";
+    var topic = (ForumUi.Models.TopicDto)ViewBag.Topic;
+    var replies = (List<ForumUi.Models.ReplyDto>)ViewBag.Replies;
+    bool isLoggedIn = ViewBag.IsLoggedIn ?? false;
+    var likedReplies = ViewBag.LikedReplies as List<int> ?? new List<int>();
 }
 
-@if (ViewBag.Success != null)
+<h2>@topic.Title</h2>
+<p>@topic.Content</p>
+<small class="text-muted">@topic.Username - @topic.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+
+
+<hr />
+
+<h4>Yanıtlar (@replies.Count)</h4>
+
+@if (replies.Any())
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle"></i> @ViewBag.Success
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    @await Html.PartialAsync("_ReplyPartial", replies.Where(r => r.ParentReplyId == null).ToList())
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-chat-square-text"></i> Henüz yanıt yok. İlk yanıtı sen yaz!
     </div>
 }
 
-@if (ViewBag.Error != null)
+<hr />
+
+@if (isLoggedIn)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle"></i> @ViewBag.Error
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <h4><i class="bi bi-chat-plus"></i> Yanıt Yaz</h4>
+    <form asp-action="AddReply" method="post" id="mainReplyForm">
+        <input type="hidden" name="TopicId" value="@ViewBag.TopicId" />
+        <input type="hidden" name="ParentReplyId" value="" />
+        <div class="mb-3">
+            <label class="form-label">Yanıtınız</label>
+            <textarea class="form-control" name="Content" rows="4" required placeholder="Düşüncelerinizi paylaşın..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-send"></i> Gönder
+        </button>
+        <button type="button" class="btn btn-secondary ms-2" onclick="cancelReply()" style="display:none;" id="cancelBtn">
+            <i class="bi bi-x-circle"></i> İptal
+        </button>
+    </form>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-info-circle"></i>
+        <a href="/Auth/Login" class="alert-link">Giriş yaparak</a> yanıt yazabilirsiniz.
     </div>
 }
-
-@if (topic != null)
-{
-    <!-- Konu Başlığı ve İçeriği -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1">
-                    <h2 class="card-title">@topic.Title</h2>
-                    <p class="card-text mt-3">@Html.Raw(topic.Content)</p>
-                    <small class="text-muted">
-                        <i class="bi bi-person"></i> @topic.Username •
-                        <i class="bi bi-calendar"></i> @topic.CreatedAt.ToString("dd.MM.yyyy HH:mm")
-                    </small>
-                </div>
-                <div class="ms-3 d-flex flex-column align-items-center">
-                    @if (ViewBag.IsLoggedIn)
-                    {
-                        <button type="button"
-                                class="btn @(topic.Liked ? "btn-primary" : "btn-outline-primary") btn-sm mb-1"
-                                id="topic-like-btn-@topic.Id"
-                                onclick="likeTopic(@topic.Id)">
-                            <i class="bi bi-heart-fill"></i>
-                        </button>
-                    }
-                    else
-                    {
-                        <button type="button" class="btn btn-outline-secondary btn-sm mb-1" disabled>
-                            <i class="bi bi-heart"></i>
-                        </button>
-                    }
-                    <small class="text-muted">
-                        <span id="topic-like-count-@topic.Id">@topic.LikeCount</span>
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Yanıt Ekleme Formu -->
-    @if (ViewBag.IsLoggedIn)
-    {
-        <div class="card mb-4" id="main-reply-form">
-            <div class="card-header">
-                <h5><i class="bi bi-reply"></i> Yanıt Yaz</h5>
-            </div>
-            <div class="card-body">
-                <form asp-controller="Topics" asp-action="AddReply" method="post">
-                    @Html.AntiForgeryToken()
-                    <input asp-for="TopicId" type="hidden" value="@topic.Id" />
-                    <input asp-for="ParentReplyId" type="hidden" value="" />
-                    <div class="mb-3">
-                        <textarea asp-for="Content" class="form-control" rows="4" placeholder="Yanıtınızı yazın..."></textarea>
-                        <span asp-validation-for="Content" class="text-danger"></span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send"></i> Yanıt Gönder
-                    </button>
-                    <button type="button" class="btn btn-secondary d-none" id="cancel-reply" onclick="cancelReply()">
-                        İptal
-                    </button>
-                </form>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle"></i> Yanıt yazmak için <a href="/Auth/Login">giriş yapın</a>.
-        </div>
-    }
-
-    <!-- Yanıtlar -->
-    <h4><i class="bi bi-chat-left-text"></i> Yanıtlar (@(replies?.Sum(r => 1 + CountChildReplies(r)) ?? 0))</h4>
-
-    @if (replies?.Any() == true)
-    {
-        @foreach (var reply in replies)
-        {
-            @await Html.PartialAsync("_ReplyPartial", reply)
-        }
-    }
-    else
-    {
-        <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle"></i> Henüz yanıt yok. İlk yanıtı siz yazın!
-        </div>
-    }
-}
-
-<div class="mt-4">
-    <a asp-controller="Topics" asp-action="Index" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri Dön
-    </a>
-</div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
-        // CSRF Token için
-        @Html.AntiForgeryToken()
+        let replyingTo = null;
 
-        function likeReply(replyId, topicId) {
-            fetch('/Topics/LikeReply', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `replyId=${replyId}&topicId=${topicId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Beğeni sayısını güncelle
-                    const likeCountElement = document.getElementById(`reply-like-count-${replyId}`);
-                    if (likeCountElement) {
-                        likeCountElement.textContent = data.likeCount;
-                    }
-
-                    // Buton rengini değiştir
-                    const likeButton = document.getElementById(`reply-like-btn-${replyId}`);
-                    if (likeButton) {
-                        if (data.liked) {
-                            likeButton.classList.remove('btn-outline-primary');
-                            likeButton.classList.add('btn-primary');
-                        } else {
-                            likeButton.classList.remove('btn-primary');
-                            likeButton.classList.add('btn-outline-primary');
-                        }
-                    }
-
-                    showMessage('Beğeni işlemi başarılı!', 'success');
-                } else {
-                    showMessage(data.message || 'Beğeni işlemi başarısız oldu.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Bir hata oluştu.', 'error');
-            });
-        }
-
-        function likeTopic(topicId) {
-            fetch('/Topics/LikeTopic', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `topicId=${topicId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Beğeni sayısını güncelle
-                    const likeCountElement = document.getElementById(`topic-like-count-${topicId}`);
-                    if (likeCountElement) {
-                        likeCountElement.textContent = data.likeCount;
-                    }
-
-                    // Buton rengini değiştir
-                    const likeButton = document.getElementById(`topic-like-btn-${topicId}`);
-                    if (likeButton) {
-                        if (data.liked) {
-                            likeButton.classList.remove('btn-outline-primary');
-                            likeButton.classList.add('btn-primary');
-                        } else {
-                            likeButton.classList.remove('btn-primary');
-                            likeButton.classList.add('btn-outline-primary');
-                        }
-                    }
-
-                    showMessage('Konu beğenisi güncellendi!', 'success');
-                } else {
-                    showMessage(data.message || 'Beğeni işlemi başarısız oldu.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Bir hata oluştu.', 'error');
-            });
-        }
-
-        function replyToReply(replyId, username) {
-            const form = document.getElementById('main-reply-form');
-            const parentReplyIdInput = document.querySelector('input[name="ParentReplyId"]');
-            const contentTextarea = document.querySelector('textarea[name="Content"]');
-            const cardHeader = form.querySelector('.card-header h5');
-            const cancelButton = document.getElementById('cancel-reply');
+        function replyToComment(replyId, username) {
+            replyingTo = replyId;
 
             // Form başlığını güncelle
-            cardHeader.innerHTML = `<i class="bi bi-reply"></i> ${username} kullanıcısına yanıt yazıyorsunuz`;
+            document.querySelector('h4').innerHTML = `<i class="bi bi-reply"></i> ${username} kullanıcısına yanıt yazıyorsunuz`;
 
-            // ParentReplyId'yi set et
-            parentReplyIdInput.value = replyId;
+            // Gizli alanı güncelle
+            document.querySelector('input[name="ParentReplyId"]').value = replyId;
 
             // Placeholder'ı güncelle
-            contentTextarea.placeholder = `${username} kullanıcısına yanıtınızı yazın...`;
+            document.querySelector('textarea[name="Content"]').placeholder = `${username} kullanıcısına yanıtınız...`;
 
             // İptal butonunu göster
-            cancelButton.classList.remove('d-none');
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            // Form'a odaklan
+            document.querySelector('textarea[name="Content"]').focus();
 
             // Form'a scroll yap
-            form.scrollIntoView({ behavior: 'smooth' });
-
-            // Textarea'ya focus yap
-            contentTextarea.focus();
+            document.getElementById('mainReplyForm').scrollIntoView({ behavior: 'smooth' });
         }
 
         function cancelReply() {
-            const form = document.getElementById('main-reply-form');
-            const parentReplyIdInput = document.querySelector('input[name="ParentReplyId"]');
-            const contentTextarea = document.querySelector('textarea[name="Content"]');
-            const cardHeader = form.querySelector('.card-header h5');
-            const cancelButton = document.getElementById('cancel-reply');
+            replyingTo = null;
 
             // Form başlığını sıfırla
-            cardHeader.innerHTML = '<i class="bi bi-reply"></i> Yanıt Yaz';
+            document.querySelector('h4').innerHTML = '<i class="bi bi-chat-plus"></i> Yanıt Yaz';
 
-            // ParentReplyId'yi temizle
-            parentReplyIdInput.value = '';
+            // Gizli alanı temizle
+            document.querySelector('input[name="ParentReplyId"]').value = '';
 
             // Placeholder'ı sıfırla
-            contentTextarea.placeholder = 'Yanıtınızı yazın...';
+            document.querySelector('textarea[name="Content"]').placeholder = 'Düşüncelerinizi paylaşın...';
 
             // İptal butonunu gizle
-            cancelButton.classList.add('d-none');
+            document.getElementById('cancelBtn').style.display = 'none';
 
             // Textarea'yı temizle
-            contentTextarea.value = '';
+            document.querySelector('textarea[name="Content"]').value = '';
         }
 
-        function showMessage(message, type) {
-            // Mevcut alert'leri temizle
-            const existingAlerts = document.querySelectorAll('.temp-alert');
-            existingAlerts.forEach(alert => alert.remove());
+        function toggleReplies(replyId) {
+            const repliesDiv = document.getElementById(`replies-${replyId}`);
+            const toggleBtn = document.getElementById(`toggle-${replyId}`);
+            const replyCount = repliesDiv.querySelectorAll('.child-reply').length;
 
-            // Yeni alert oluştur
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show temp-alert`;
-            alertDiv.innerHTML = `
-                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            if (repliesDiv.style.display === 'none') {
+                repliesDiv.style.display = 'block';
+                repliesDiv.classList.add('show');
+                repliesDiv.classList.remove('hide');
+                toggleBtn.innerHTML = `<i class="bi bi-chevron-up"></i> ${replyCount} yanıt gizle`;
+                toggleBtn.classList.remove('btn-outline-info');
+                toggleBtn.classList.add('btn-info');
+            } else {
+                repliesDiv.classList.add('hide');
+                repliesDiv.classList.remove('show');
 
-            // Container'ın başına ekle
-            const container = document.querySelector('.container');
-            if (container) {
-                container.insertBefore(alertDiv, container.firstChild);
-
-                // 3 saniye sonra otomatik kapat
                 setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.remove();
-                    }
-                }, 3000);
+                    repliesDiv.style.display = 'none';
+                }, 400);
+
+                toggleBtn.innerHTML = `<i class="bi bi-chevron-down"></i> ${replyCount} yanıt`;
+                toggleBtn.classList.remove('btn-info');
+                toggleBtn.classList.add('btn-outline-info');
             }
         }
     </script>
-}
-
-@functions {
-    int CountChildReplies(ForumUi.Models.ReplyDto reply)
-    {
-        if (reply.ChildReplies == null || !reply.ChildReplies.Any())
-            return 0;
-
-        int count = reply.ChildReplies.Count;
-        foreach (var child in reply.ChildReplies)
-        {
-            count += CountChildReplies(child);
-        }
-        return count;
-    }
 }

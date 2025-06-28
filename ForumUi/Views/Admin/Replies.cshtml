@@ -1,0 +1,39 @@
+﻿@model List<ForumUi.Models.ReplyDto>
+@{
+    ViewData["Title"] = "Tüm Yanıtlar";
+}
+
+<h2>💬 Tüm Yanıtlar</h2>
+<hr />
+
+@if (Model.Any())
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>İçerik</th>
+                <th>Kullanıcı</th>
+                <th>Konu ID</th>
+                <th>Tarih</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reply in Model)
+            {
+                <tr>
+                    <td>@reply.Id</td>
+                    <td>@(reply.Content.Length > 50 ? reply.Content.Substring(0, 50) + "..." : reply.Content)</td>
+                    <td>@reply.Username</td>
+                    <td>@reply.TopicId</td>
+                   
+                    <td>@reply.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">Hiç yanıt yok.</div>
+}

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ForumApi.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20250529095338_mig1")]
-    partial class mig1
+    [Migration("20250627193243_mig")]
+    partial class mig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,45 +24,6 @@ namespace ForumApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ForumApi.Models.Entities.Like", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ReplyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TopicId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReplyId");
-
-                    b.HasIndex("TopicId");
-
-                    b.HasIndex("UserId", "ReplyId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Like_User_Reply")
-                        .HasFilter("[ReplyId] IS NOT NULL AND [TopicId] IS NULL");
-
-                    b.HasIndex("UserId", "TopicId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Like_User_Topic")
-                        .HasFilter("[TopicId] IS NOT NULL AND [ReplyId] IS NULL");
-
-                    b.ToTable("Likes");
-                });
 
             modelBuilder.Entity("ForumApi.Models.Entities.Reply", b =>
                 {
@@ -79,17 +40,14 @@ namespace ForumApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ParentReplyId")
                         .HasColumnType("int");
 
                     b.Property<int>("TopicId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -120,16 +78,13 @@ namespace ForumApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -187,29 +142,6 @@ namespace ForumApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ForumApi.Models.Entities.Like", b =>
-                {
-                    b.HasOne("ForumApi.Models.Entities.Reply", "Reply")
-                        .WithMany("Likes")
-                        .HasForeignKey("ReplyId");
-
-                    b.HasOne("ForumApi.Models.Entities.Topic", "Topic")
-                        .WithMany("Likes")
-                        .HasForeignKey("TopicId");
-
-                    b.HasOne("ForumApi.Models.Entities.User", "User")
-                        .WithMany("Likes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Reply");
-
-                    b.Navigation("Topic");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ForumApi.Models.Entities.Reply", b =>
                 {
                     b.HasOne("ForumApi.Models.Entities.Reply", "ParentReply")
@@ -249,21 +181,15 @@ namespace ForumApi.Migrations
             modelBuilder.Entity("ForumApi.Models.Entities.Reply", b =>
                 {
                     b.Navigation("ChildReplies");
-
-                    b.Navigation("Likes");
                 });
 
             modelBuilder.Entity("ForumApi.Models.Entities.Topic", b =>
                 {
-                    b.Navigation("Likes");
-
                     b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("ForumApi.Models.Entities.User", b =>
                 {
-                    b.Navigation("Likes");
-
                     b.Navigation("Replies");
 
                     b.Navigation("Topics");

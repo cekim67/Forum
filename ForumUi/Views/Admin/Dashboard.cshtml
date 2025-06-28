@@ -1,31 +1,35 @@
-﻿@{
-    ViewData["Title"] = "Admin Panel";
+﻿@model ForumUi.Models.ForumStatsDto
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Kontrol Paneli</h2>
+<h2>📊 Forum İstatistikleri</h2>
 
 <div class="row">
-    <div class="col-md-6">
-        <div class="card shadow-sm mb-3">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Toplam Kullanıcı</div>
             <div class="card-body">
-                <h5 class="card-title">Kullanıcılar</h5>
-                <p class="card-text">Tüm kullanıcıları görüntüleyin, yetki verin veya devre dışı bırakın.</p>
-                <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="ManageUsers">
-                    Kullanıcıları Yönet
-                </a>
+                <h5 class="card-title">@Model.TotalUsers</h5>
             </div>
         </div>
     </div>
-
-    <div class="col-md-6">
-        <div class="card shadow-sm mb-3">
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Toplam Konu</div>
             <div class="card-body">
-                <h5 class="card-title">Konular ve Yanıtlar</h5>
-                <p class="card-text">Tüm forum içeriğini görüntüleyin ve gerektiğinde silin.</p>
-                <a class="btn btn-outline-danger" asp-controller="Admin" asp-action="ModerateContent">
-                    İçerik Yönetimi
-                </a>
+                <h5 class="card-title">@Model.TotalTopics</h5>
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Toplam Yanıt</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.TotalReplies</h5>
+            </div>
+        </div>
+    </div>
+    
 </div>

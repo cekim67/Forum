@@ -21,13 +21,8 @@ namespace ForumApi.Models.Entities
         public int UserId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
-        public DateTime? UpdatedAt { get; set; }
-
-        public bool IsDeleted { get; set; } = false;
-
         public int ViewCount { get; set; } = 0;
-        public int LikeCount { get; set; } = 0;
+        
 
 
         // Navigation Properties
@@ -35,6 +30,6 @@ namespace ForumApi.Models.Entities
         public virtual User User { get; set; } = null!;
 
         public virtual ICollection<Reply> Replies { get; set; } = new List<Reply>();
-        public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+        
     }
 }

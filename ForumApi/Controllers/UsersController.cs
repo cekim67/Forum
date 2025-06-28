@@ -60,25 +60,6 @@ namespace ForumApi.Controllers
             return Ok(topics);
         }
 
-        /// <summary>
-        /// Kullanıcının profil bilgilerini günceller
-        /// </summary>
-        /// <param name="dto">Güncellenecek profil bilgileri</param>
-        /// <returns>Güncelleme işleminin sonucu</returns>
-        /// <response code="200">Profil başarıyla güncellendi</response>
-        /// <response code="400">Profil güncellenemedi veya geçersiz veri</response>
-        /// <response code="401">Kullanıcı giriş yapmamış</response>
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("me")]
-        public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            var result = await _userService.UpdateProfileAsync(userId, dto);
-            if (!result) return BadRequest("Profil güncellenemedi.");
-            return Ok("Profil güncellendi.");
-        }
+
     }
 }

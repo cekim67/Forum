@@ -36,6 +36,5 @@ namespace ForumApi.Models.Entities
         // Navigation Properties
         public virtual ICollection<Topic> Topics { get; set; } = new List<Topic>();
         public virtual ICollection<Reply> Replies { get; set; } = new List<Reply>();
-        public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }

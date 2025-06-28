@@ -1,0 +1,74 @@
+﻿@*
+    Model olarak hiyerarşik (iç içe) bir ReplyDto listesi beklenir.
+    Her ReplyDto nesnesi, kendi alt yanıtlarını "ChildReplies" listesinde barındırmalıdır.
+*@
+@model List<ForumUi.Models.ReplyDto>
+
+@{
+    // Mevcut iç içe geçme seviyesini (level) ViewBag'den alıyoruz. Başlangıçta 0'dır.
+    var level = ViewBag.Level ?? 0;
+    var isLoggedIn = ViewBag.IsLoggedIn as bool? ?? false;
+}
+
+@foreach (var reply in Model)
+{
+    // Alt yanıtların olup olmadığını kontrol ediyoruz.
+    var hasChildren = reply.ChildReplies != null && reply.ChildReplies.Any();
+
+    // Seviyeye göre CSS sınıfı ekliyoruz. child-reply sınıfı 0'dan büyük seviyeler için eklenir.
+    <div class="reply-card @(level > 0 ? "child-reply" : "")">
+        <div class="reply-content">
+            <div class="reply-header">
+                <div class="user-avatar" title="@reply.Username">
+                    @reply.Username.Substring(0, 1).ToUpper()
+                </div>
+                <div class="reply-meta">
+                    <span class="reply-username">@reply.Username</span>
+                    <span class="reply-date">@reply.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+            </div>
+
+            <div class="reply-text">
+                @Html.Raw(reply.Content)
+            </div>
+
+            <div class="reply-actions">
+                @if (isLoggedIn)
+                {
+                    <form asp-controller="Topics" asp-action="LikeReply" asp-route-replyId="@reply.Id" asp-route-topicId="@ViewBag.TopicId" method="post" class="d-inline-flex align-items-center">
+                        
+                    </form>
+
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="replyToComment(@reply.Id, '@reply.Username')">
+                        <i class="bi bi-reply"></i> Yanıtla
+                    </button>
+                }
+                else
+                {
+                    
+                    <a href="/Auth/Login" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-reply"></i> Yanıtla
+                    </a>
+                }
+
+                @if (hasChildren)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-info toggle-replies-btn" id="toggle-@reply.Id" onclick="toggleReplies(@reply.Id)">
+                        <i class="bi bi-chevron-down"></i> @reply.ChildReplies.Count yanıtı göster
+                    </button>
+                }
+            </div>
+        </div>
+
+        @if (hasChildren)
+        {
+            <div class="reply-thread" id="replies-@reply.Id" style="display: none;">
+                @{
+                    // Bir sonraki seviye için ViewBag'i güncelliyoruz.
+                    ViewBag.Level = level + 1;
+                }
+                @await Html.PartialAsync("_ReplyPartial", reply.ChildReplies)
+            </div>
+        }
+    </div>
+}
