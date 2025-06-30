@@ -19,7 +19,7 @@ namespace ForumUi.Controllers
         [HttpGet("Login")]
         public IActionResult Login()
         {
-            // Eğer zaten giriş yapmışsa ana sayfaya yönlendir
+            
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("JWToken")))
             {
                 return RedirectToAction("Index", "Topics");
@@ -65,10 +65,10 @@ namespace ForumUi.Controllers
                     return View(viewModel);
                 }
 
-                // Token'ı session'a kaydet
+                
                 HttpContext.Session.SetString("JWToken", tokenObj.Token);
 
-                // Kullanıcı bilgilerini /api/Users/me endpoint'inden al
+                
                 try
                 {
                     var userClient = _httpClientFactory.CreateClient();
@@ -84,23 +84,23 @@ namespace ForumUi.Controllers
 
                         if (userInfo != null)
                         {
-                            // Admin durumunu session'a kaydet
+                            
                             HttpContext.Session.SetString("IsAdmin", userInfo.IsAdmin ? "1" : "0");
 
-                            // Kullanıcı adını da session'a kaydet
+                            
                             HttpContext.Session.SetString("Username", userInfo.Username);
                             HttpContext.Session.SetString("UserId", userInfo.Id.ToString());
                         }
                     }
                     else
                     {
-                        // Kullanıcı bilgileri alınamazsa, default olarak admin değil kabul et
+                        
                         HttpContext.Session.SetString("IsAdmin", "0");
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Hata durumunda log'la ve default değerler kullan
+                    
                     Console.WriteLine($"Kullanıcı bilgileri alınamadı: {ex.Message}");
                     HttpContext.Session.SetString("IsAdmin", "0");
                 }
@@ -134,7 +134,7 @@ namespace ForumUi.Controllers
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri("https://localhost:7172");
 
-            // ViewModel'i DTO'ya çevir
+           
             var dto = new RegisterDto
             {
                 Username = viewModel.Username,

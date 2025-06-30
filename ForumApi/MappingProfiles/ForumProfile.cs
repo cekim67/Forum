@@ -16,7 +16,6 @@ namespace ForumApi.MappingProfiles
             // Entity -> Response
             CreateMap<Topic, TopicResponseDto>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
-                
                 .ForMember(dest => dest.ViewCount, opt => opt.MapFrom(src => src.ViewCount)); ;
 
             CreateMap<CreateReplyDto, Reply>();
@@ -25,8 +24,6 @@ namespace ForumApi.MappingProfiles
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
                 .ForMember(dest => dest.ChildReplies, opt => opt.MapFrom(src => src.ChildReplies));
             CreateMap<User, UserDto>();
-
-
         }
     }
 }

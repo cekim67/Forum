@@ -1,7 +1,6 @@
 ﻿using ForumApi.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace ForumApi.Models.Entities
 {
     [Table("Replies")]
@@ -23,11 +22,6 @@ namespace ForumApi.Models.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-
-
-       
-
-        // Navigation Properties
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
 
@@ -36,9 +30,6 @@ namespace ForumApi.Models.Entities
 
         [ForeignKey("ParentReplyId")]
         public virtual Reply? ParentReply { get; set; }
-
-        // .NET 8.0 Collection Expression
         public virtual ICollection<Reply> ChildReplies { get; set; } = [];
-        
     }
 }

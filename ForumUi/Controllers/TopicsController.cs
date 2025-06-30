@@ -19,7 +19,7 @@ namespace ForumUi.Controllers
         public async Task<IActionResult> Index()
         {
             var client = _clientFactory.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:7172"); // API URL
+            client.BaseAddress = new Uri("https://localhost:7172"); 
             var token = HttpContext.Session.GetString("JWToken");
             var isLoggedIn = !string.IsNullOrEmpty(token);
 
@@ -40,7 +40,7 @@ namespace ForumUi.Controllers
 
             return View(topics ?? new List<TopicDto>());
         }
-        // GET: Konu oluşturma formunu gösterir
+        
         [HttpGet]
         public IActionResult Create()
         {
@@ -54,7 +54,7 @@ namespace ForumUi.Controllers
             return View();
         }
 
-        // POST: API'ye yeni konu gönderir
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTopicDto dto)
@@ -97,14 +97,14 @@ namespace ForumUi.Controllers
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
 
-            // Konu bilgisi
+            
             var topicResponse = await client.GetAsync($"/api/Topics/{id}");
             if (!topicResponse.IsSuccessStatusCode) return NotFound();
 
             var topicJson = await topicResponse.Content.ReadAsStringAsync();
             var topic = JsonConvert.DeserializeObject<TopicDto>(topicJson);
 
-            // Yanıtlar (hiyerarşik yapı için)
+            
             var replyResponse = await client.GetAsync($"/api/Replies/topic/{id}");
             var replies = new List<ReplyDto>();
 
@@ -113,7 +113,7 @@ namespace ForumUi.Controllers
                 var replyJson = await replyResponse.Content.ReadAsStringAsync();
                 var allReplies = JsonConvert.DeserializeObject<List<ReplyDto>>(replyJson) ?? new();
 
-                // Yanıtları hiyerarşik yapıya dönüştür
+               
                 replies = BuildReplyHierarchy(allReplies);
             }
            
@@ -194,24 +194,24 @@ namespace ForumUi.Controllers
             return RedirectToAction("Details", new { id = topicId });
         }
 
-        // TopicsController.cs - Düzeltilmiş BuildReplyHierarchy metodu
+        
         private List<ReplyDto> BuildReplyHierarchy(List<ReplyDto> allReplies)
         {
-            // Önce tüm yanıtları ID'ye göre dictionary'e koy
+            
             var replyDict = allReplies.ToDictionary(r => r.Id, r => r);
             var rootReplies = new List<ReplyDto>();
 
-            // Her yanıt için parent-child ilişkisini kur
+            
             foreach (var reply in allReplies)
             {
                 if (reply.ParentReplyId == null)
                 {
-                    // Ana yanıt (parent'ı yok)
+                    
                     rootReplies.Add(reply);
                 }
                 else if (replyDict.ContainsKey(reply.ParentReplyId.Value))
                 {
-                    // Alt yanıt - parent'ının ChildReplies listesine ekle
+                    
                     var parentReply = replyDict[reply.ParentReplyId.Value];
                     if (parentReply.ChildReplies == null)
                         parentReply.ChildReplies = new List<ReplyDto>();
@@ -220,13 +220,13 @@ namespace ForumUi.Controllers
                 }
             }
 
-            // Her seviyedeki yanıtları tarih sırasına göre sırala (recursive)
+            
             SortRepliesRecursively(rootReplies);
 
             return rootReplies.OrderBy(r => r.CreatedAt).ToList();
         }
 
-        // Recursive olarak tüm seviyelerdeki yanıtları sırala
+        
         private void SortRepliesRecursively(List<ReplyDto> replies)
         {
             foreach (var reply in replies)

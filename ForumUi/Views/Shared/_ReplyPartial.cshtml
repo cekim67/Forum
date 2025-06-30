@@ -1,21 +1,15 @@
-﻿@*
-    Model olarak hiyerarşik (iç içe) bir ReplyDto listesi beklenir.
-    Her ReplyDto nesnesi, kendi alt yanıtlarını "ChildReplies" listesinde barındırmalıdır.
-*@
-@model List<ForumUi.Models.ReplyDto>
-
+﻿@model List<ForumUi.Models.ReplyDto>
 @{
-    // Mevcut iç içe geçme seviyesini (level) ViewBag'den alıyoruz. Başlangıçta 0'dır.
+    
     var level = ViewBag.Level ?? 0;
     var isLoggedIn = ViewBag.IsLoggedIn as bool? ?? false;
 }
 
 @foreach (var reply in Model)
 {
-    // Alt yanıtların olup olmadığını kontrol ediyoruz.
+  
     var hasChildren = reply.ChildReplies != null && reply.ChildReplies.Any();
 
-    // Seviyeye göre CSS sınıfı ekliyoruz. child-reply sınıfı 0'dan büyük seviyeler için eklenir.
     <div class="reply-card @(level > 0 ? "child-reply" : "")">
         <div class="reply-content">
             <div class="reply-header">
@@ -64,7 +58,7 @@
         {
             <div class="reply-thread" id="replies-@reply.Id" style="display: none;">
                 @{
-                    // Bir sonraki seviye için ViewBag'i güncelliyoruz.
+                    
                     ViewBag.Level = level + 1;
                 }
                 @await Html.PartialAsync("_ReplyPartial", reply.ChildReplies)

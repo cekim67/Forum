@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using ForumUi.Models; // Modellerinizin burada olduğundan emin olun
+using ForumUi.Models; 
 using System.Net.Http.Headers;
 using System.Net.Http;
 
@@ -26,7 +26,7 @@ namespace ForumUi.Controllers
         private HttpClient CreateAuthorizedClient()
         {
             var token = HttpContext.Session.GetString("JWToken");
-            var client = _clientFactory.CreateClient(); // _httpClientFactory düzeltildi
+            var client = _clientFactory.CreateClient(); 
             client.BaseAddress = new Uri("https://localhost:7172");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             return client;
@@ -34,7 +34,7 @@ namespace ForumUi.Controllers
 
         public async Task<IActionResult> Dashboard()
         {
-            // Yetki kontrolü
+            
             if (!IsUserAdmin())
             {
                 TempData["Error"] = "Bu sayfaya erişim yetkiniz yok!";
@@ -72,7 +72,7 @@ namespace ForumUi.Controllers
 
         public async Task<IActionResult> Users()
         {
-            // Yetki kontrolü
+            
             if (!IsUserAdmin())
             {
                 TempData["Error"] = "Bu sayfaya erişim yetkiniz yok!";
@@ -108,7 +108,7 @@ namespace ForumUi.Controllers
             }
         }
 
-        // Tüm konuları görüntüleme sayfası (Duplicate olan silindi, bu bırakıldı)
+       
         public async Task<IActionResult> Topics()
         {
             if (!IsUserAdmin())
@@ -125,22 +125,22 @@ namespace ForumUi.Controllers
                 if (!response.IsSuccessStatusCode)
                 {
                     TempData["Error"] = $"Konular alınamadı! Status: {response.StatusCode}";
-                    return View(new List<TopicDto>()); // TopicDto kullanıldığından emin olun
+                    return View(new List<TopicDto>()); 
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var topics = JsonConvert.DeserializeObject<List<TopicDto>>(json); // Deserializasyon eklendi
+                var topics = JsonConvert.DeserializeObject<List<TopicDto>>(json); 
 
-                return View(topics ?? new List<TopicDto>()); // Modeli View'a gönder
+                return View(topics ?? new List<TopicDto>()); 
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Bir hata oluştu: {ex.Message}";
-                return View(new List<TopicDto>()); // TopicDto kullanıldığından emin olun
+                return View(new List<TopicDto>()); 
             }
         }
 
-        // Tüm yanıtları görüntüleme sayfası (Duplicate olan silindi, bu bırakıldı)
+        
         public async Task<IActionResult> Replies()
         {
             if (!IsUserAdmin())
@@ -157,18 +157,18 @@ namespace ForumUi.Controllers
                 if (!response.IsSuccessStatusCode)
                 {
                     TempData["Error"] = $"Yanıtlar alınamadı! Status: {response.StatusCode}";
-                    return View(new List<ReplyDto>()); // ReplyDto kullanıldığından emin olun
+                    return View(new List<ReplyDto>()); 
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var replies = JsonConvert.DeserializeObject<List<ReplyDto>>(json); // Deserializasyon eklendi
+                var replies = JsonConvert.DeserializeObject<List<ReplyDto>>(json); 
 
-                return View(replies ?? new List<ReplyDto>()); // Modeli View'a gönder
+                return View(replies ?? new List<ReplyDto>()); 
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Bir hata oluştu: {ex.Message}";
-                return View(new List<ReplyDto>()); // ReplyDto kullanıldığından emin olun
+                return View(new List<ReplyDto>()); 
             }
         }
     }
